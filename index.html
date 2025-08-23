@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Flashlight</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .flashlight-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid #444;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 2rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flashlight-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .flashlight-button:active {
+            transform: translateY(0);
+        }
+
+        .flashlight-button.on {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            border-color: #ffd700;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
+            }
+            to {
+                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.3);
+            }
+        }
+
+        .status {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            min-height: 1.5rem;
+        }
+
+        .instructions {
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.5;
+            margin-top: 2rem;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .flashlight-button {
+                width: 160px;
+                height: 160px;
+                font-size: 1rem;
+            }
+            
+            .icon {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Flashlight</h1>
+        
+        <button id="flashlightBtn" class="flashlight-button">
+            <div>
+                <div class="icon">🔦</div>
+                <div>TAP TO ACTIVATE</div>
+            </div>
+        </button>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="instructions">
+            <p><strong>How it works:</strong></p>
+            <p>This app uses your device's camera flash as a flashlight. You'll need to grant camera permissions when prompted.</p>
+            <p><em>Works best on mobile devices with camera flash.</em></p>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; font-size: 0.8rem;">
+                <p><strong>⚠️ Permission Issues?</strong></p>
+                <p>• Make sure you're using <strong>HTTPS</strong> (not HTTP)</p>
+                <p>• Try <strong>Chrome</strong> or <strong>Safari</strong> browser</p>
+                <p>• Check browser settings → Site permissions → Camera</p>
+                <p>• Some browsers block camera on GitHub Pages - try the direct link</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isFlashlightOn = false;
+        let stream = null;
+        let track = null;
+
+        const flashlightBtn = document.getElementById('flashlightBtn');
+        const statusDiv = document.getElementById('status');
+
+        flashlightBtn.addEventListener('click', toggleFlashlight);
+
+        async function toggleFlashlight() {
+            if (!isFlashlightOn) {
+                await turnOnFlashlight();
+            } else {
+                turnOffFlashlight();
+            }
+        }
+
+        async function turnOnFlashlight() {
+            try {
+                statusDiv.textContent = 'Requesting camera access...';
+                
+                // Check if browser supports the required APIs
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera access not supported in this browser');
+                }
+
+                // Request camera access with torch constraint
+                const constraints = {
+                    video: {
+                        facingMode: 'environment', // Use back camera
+                        torch: true // This might not work on all browsers
+                    }
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                track = stream.getVideoTracks()[0];
+
+                // Check if torch is supported
+                const capabilities = track.getCapabilities();
+                if (!capabilities.torch) {
+                    // Try alternative approach - start camera and then enable torch
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' }
+                    });
+                    track = stream.getVideoTracks()[0];
+                }
+
+                // Apply torch constraint
+                if (track.getCapabilities().torch) {
+                    await track.applyConstraints({
+                        advanced: [{ torch: true }]
+                    });
+                    
+                    isFlashlightOn = true;
+                    updateUI();
+                    statusDiv.textContent = '💡 Flashlight is ON';
+                } else {
+                    throw new Error('Torch/flashlight not supported on this device');
+                }
+
+            } catch (error) {
+                console.error('Error accessing flashlight:', error);
+                let errorMessage = 'Unable to access flashlight. ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Camera permission denied. Try: 1) Refresh and allow when prompted 2) Check browser settings → Site permissions → Camera 3) Use Chrome/Safari browser 4) Ensure you\'re on HTTPS';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No camera found on this device.';
+                } else if (error.message.includes('torch')) {
+                    errorMessage += 'This device doesn\'t support flashlight control through the browser.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                statusDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+                
+                // Clean up
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    track = null;
+                }
+            }
+        }
+
+        function turnOffFlashlight() {
+            if (stream && track) {
+                // Turn off torch
+                track.applyConstraints({
+                    advanced: [{ torch: false }]
+                });
+                
+                // Stop the stream
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                track = null;
+            }
+            
+            isFlashlightOn = false;
+            updateUI();
+            statusDiv.textContent = '🔦 Flashlight is OFF';
+        }
+
+        function updateUI() {
+            if (isFlashlightOn) {
+                flashlightBtn.classList.add('on');
+                flashlightBtn.innerHTML = `
+                    <div>
+                        <div class="icon">💡</div>
+                        <div>TAP TO TURN OFF</div>
+                    </div>
+                `;
+            } else {
+                flashlightBtn.classList.remove('on');
+                flashlightBtn.innerHTML = `
+                    <div>
+                        <div class="icon">🔦</div>
+                        <div>TAP TO ACTIVATE</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Handle page visibility changes (turn off when page is hidden)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isFlashlightOn) {
+                turnOffFlashlight();
+            }
+        });
+
+        // Handle before unload (cleanup)
+        window.addEventListener('beforeunload', function() {
+            if (isFlashlightOn) {
+                turnOffFlashlight();
+            }
+        });
+    </script>
+</body>
+</html>
