@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Flashlight</title>
+    <title>Screen Flashlight</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            background-color: #000000;
             color: white;
             min-height: 100vh;
             display: flex;
@@ -21,12 +21,35 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.flashlight-on {
+            background: linear-gradient(to bottom, #ff0000 0%, #ff0000 33.33%, #ffffff 33.33%, #ffffff 66.66%, #00ff00 66.66%, #00ff00 100%);
+            color: #000000;
+            position: relative;
+        }
+
+        body.flashlight-on::before {
+            content: "Точикистон ба пеш !!!";
+            position: absolute;
+            top: 16.66%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .container {
             text-align: center;
             max-width: 400px;
             width: 100%;
+            position: relative;
+            z-index: 2;
         }
 
         h1 {
@@ -34,14 +57,20 @@
             margin-bottom: 2rem;
             font-weight: 300;
             letter-spacing: 2px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        body.flashlight-on h1 {
+            opacity: 0.1;
         }
 
         .flashlight-button {
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            border: 4px solid #444;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 4px solid #ff0000;
+            background-color: #ff0000;
             color: white;
             font-size: 1.2rem;
             font-weight: 600;
@@ -51,62 +80,95 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(255, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .flashlight-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 12px 40px rgba(255, 0, 0, 0.7);
         }
 
         .flashlight-button:active {
             transform: translateY(0);
         }
 
-        .flashlight-button.on {
-            background: linear-gradient(145deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
-            border-color: #ffd700;
-            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
-            }
-            to {
-                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.3);
-            }
+        body.flashlight-on .flashlight-button {
+            background-color: #333333;
+            border-color: #333333;
+            box-shadow: 0 8px 32px rgba(51, 51, 51, 0.3);
         }
 
         .status {
             font-size: 1.1rem;
             margin: 1rem 0;
             min-height: 1.5rem;
+            transition: opacity 0.3s ease;
+        }
+
+        body.flashlight-on .status {
+            opacity: 0.3;
         }
 
         .instructions {
             font-size: 0.9rem;
-            color: #aaa;
+            opacity: 0.7;
             line-height: 1.5;
             margin-top: 2rem;
+            transition: opacity 0.3s ease;
         }
 
-        .error {
-            color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
+        body.flashlight-on .instructions {
+            opacity: 0.1;
         }
 
-        .icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+        .brightness-controls {
+            margin-top: 1rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        body.flashlight-on .brightness-controls {
+            opacity: 1;
+        }
+
+        .brightness-button {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .brightness-button:hover {
+            background-color: #555;
+        }
+
+        body.flashlight-on .brightness-button {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            border-color: #333333 !important;
+        }
+
+        body.flashlight-on .brightness-button:hover {
+            background-color: #333333 !important;
+            color: #ffffff !important;
+        }
+
+        /* Prevent screen from dimming */
+        .keep-awake {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
         }
 
         @media (max-width: 480px) {
@@ -119,176 +181,138 @@
                 height: 160px;
                 font-size: 1rem;
             }
-            
-            .icon {
-                font-size: 2.5rem;
-            }
+        }
+
+        /* Maximum brightness with tricolor variations */
+        body.brightness-max {
+            background: linear-gradient(to bottom, #ff0000 0%, #ff0000 33.33%, #ffffff 33.33%, #ffffff 66.66%, #00ff00 66.66%, #00ff00 100%) !important;
+        }
+
+        body.brightness-warm {
+            background: linear-gradient(to bottom, #ff6666 0%, #ff6666 33.33%, #fff8dc 33.33%, #fff8dc 66.66%, #66ff66 66.66%, #66ff66 100%) !important;
+        }
+
+        body.brightness-cool {
+            background: linear-gradient(to bottom, #ff3333 0%, #ff3333 33.33%, #f0f8ff 33.33%, #f0f8ff 66.66%, #33ff33 66.66%, #33ff33 100%) !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📱 Flashlight</h1>
+        <h1>📱 Screen Light</h1>
         
         <button id="flashlightBtn" class="flashlight-button">
-            <div>
-                <div class="icon">🔦</div>
-                <div>TAP TO ACTIVATE</div>
-            </div>
+            LIGHT
         </button>
         
-        <div id="status" class="status"></div>
+        <div id="status" class="status">Tap to turn on screen light</div>
+        
+        <div class="brightness-controls">
+            <button class="brightness-button" onclick="setBrightness('normal')">Normal</button>
+            <button class="brightness-button" onclick="setBrightness('warm')">Warm</button>
+            <button class="brightness-button" onclick="setBrightness('cool')">Cool</button>
+        </div>
         
         <div class="instructions">
-            <p><strong>How it works:</strong></p>
-            <p>This app uses your device's camera flash as a flashlight. You'll need to grant camera permissions when prompted.</p>
-            <p><em>Works best on mobile devices with camera flash.</em></p>
-            
-            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; font-size: 0.8rem;">
-                <p><strong>⚠️ Permission Issues?</strong></p>
-                <p>• Make sure you're using <strong>HTTPS</strong> (not HTTP)</p>
-                <p>• Try <strong>Chrome</strong> or <strong>Safari</strong> browser</p>
-                <p>• Check browser settings → Site permissions → Camera</p>
-                <p>• Some browsers block camera on GitHub Pages - try the direct link</p>
-            </div>
+            <p><strong>Screen Flashlight</strong></p>
+            <p>Uses your phone's screen as a bright light source. Perfect for reading in dark or finding items.</p>
+            <p><em>Tip: Use different brightness modes for various needs.</em></p>
         </div>
     </div>
 
+    <!-- Hidden video to prevent screen dimming -->
+    <video class="keep-awake" muted playsinline autoplay loop>
+        <source src="data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAr1tZGF0AAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1MiByMjg1NCBlOWE1OTAzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTMgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yOC4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAOWWIhAA3//p+C7v8tDDSTjf97w6BXy0jM4TD6BXXXXXXhZS5RLOp5U6DK2/LgHdGgFLcBHmyHneFhGvmRyFgvD4Z8NJLrSAAAAAOAWIVV"></video>
+
     <script>
         let isFlashlightOn = false;
-        let stream = null;
-        let track = null;
+        let currentBrightness = 'normal';
 
         const flashlightBtn = document.getElementById('flashlightBtn');
         const statusDiv = document.getElementById('status');
+        const body = document.body;
 
         flashlightBtn.addEventListener('click', toggleFlashlight);
 
-        async function toggleFlashlight() {
+        function toggleFlashlight() {
             if (!isFlashlightOn) {
-                await turnOnFlashlight();
+                turnOnFlashlight();
             } else {
                 turnOffFlashlight();
             }
         }
 
-        async function turnOnFlashlight() {
-            try {
-                statusDiv.textContent = 'Requesting camera access...';
-                
-                // Check if browser supports the required APIs
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('Camera access not supported in this browser');
-                }
-
-                // Request camera access with torch constraint
-                const constraints = {
-                    video: {
-                        facingMode: 'environment', // Use back camera
-                        torch: true // This might not work on all browsers
-                    }
-                };
-
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                track = stream.getVideoTracks()[0];
-
-                // Check if torch is supported
-                const capabilities = track.getCapabilities();
-                if (!capabilities.torch) {
-                    // Try alternative approach - start camera and then enable torch
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment' }
-                    });
-                    track = stream.getVideoTracks()[0];
-                }
-
-                // Apply torch constraint
-                if (track.getCapabilities().torch) {
-                    await track.applyConstraints({
-                        advanced: [{ torch: true }]
-                    });
-                    
-                    isFlashlightOn = true;
-                    updateUI();
-                    statusDiv.textContent = '💡 Flashlight is ON';
-                } else {
-                    throw new Error('Torch/flashlight not supported on this device');
-                }
-
-            } catch (error) {
-                console.error('Error accessing flashlight:', error);
-                let errorMessage = 'Unable to access flashlight. ';
-                
-                if (error.name === 'NotAllowedError') {
-                    errorMessage += 'Camera permission denied. Try: 1) Refresh and allow when prompted 2) Check browser settings → Site permissions → Camera 3) Use Chrome/Safari browser 4) Ensure you\'re on HTTPS';
-                } else if (error.name === 'NotFoundError') {
-                    errorMessage += 'No camera found on this device.';
-                } else if (error.message.includes('torch')) {
-                    errorMessage += 'This device doesn\'t support flashlight control through the browser.';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                statusDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
-                
-                // Clean up
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    stream = null;
-                    track = null;
-                }
+        function turnOnFlashlight() {
+            isFlashlightOn = true;
+            body.classList.add('flashlight-on');
+            setBrightness(currentBrightness);
+            
+            flashlightBtn.textContent = 'OFF';
+            statusDiv.textContent = '💡 Screen light is ON - Tap to turn off';
+            
+            // Prevent screen from sleeping
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen').catch(() => {
+                    console.log('Wake lock not supported');
+                });
+            }
+            
+            // Set screen brightness to maximum (where supported)
+            if ('screen' in window && 'brightness' in window.screen) {
+                window.screen.brightness = 1;
             }
         }
 
         function turnOffFlashlight() {
-            if (stream && track) {
-                // Turn off torch
-                track.applyConstraints({
-                    advanced: [{ torch: false }]
-                });
-                
-                // Stop the stream
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-                track = null;
-            }
-            
             isFlashlightOn = false;
-            updateUI();
-            statusDiv.textContent = '🔦 Flashlight is OFF';
+            body.classList.remove('flashlight-on', 'brightness-max', 'brightness-warm', 'brightness-cool');
+            
+            flashlightBtn.textContent = 'LIGHT';
+            statusDiv.textContent = 'Tap to turn on screen light';
         }
 
-        function updateUI() {
+        function setBrightness(type) {
+            currentBrightness = type;
+            
             if (isFlashlightOn) {
-                flashlightBtn.classList.add('on');
-                flashlightBtn.innerHTML = `
-                    <div>
-                        <div class="icon">💡</div>
-                        <div>TAP TO TURN OFF</div>
-                    </div>
-                `;
-            } else {
-                flashlightBtn.classList.remove('on');
-                flashlightBtn.innerHTML = `
-                    <div>
-                        <div class="icon">🔦</div>
-                        <div>TAP TO ACTIVATE</div>
-                    </div>
-                `;
+                // Remove all brightness classes
+                body.classList.remove('brightness-max', 'brightness-warm', 'brightness-cool');
+                
+                // Add specific brightness class
+                if (type === 'warm') {
+                    body.classList.add('brightness-warm');
+                } else if (type === 'cool') {
+                    body.classList.add('brightness-cool');
+                } else {
+                    body.classList.add('brightness-max');
+                }
             }
         }
 
-        // Handle page visibility changes (turn off when page is hidden)
+        // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (document.hidden && isFlashlightOn) {
-                turnOffFlashlight();
+                // Don't turn off when page becomes hidden - user might be using it
+                console.log('Page hidden but keeping light on');
             }
         });
 
-        // Handle before unload (cleanup)
-        window.addEventListener('beforeunload', function() {
+        // Handle orientation changes
+        window.addEventListener('orientationchange', function() {
+            // Maintain light state during orientation changes
+            setTimeout(() => {
+                if (isFlashlightOn) {
+                    body.classList.add('flashlight-on');
+                }
+            }, 100);
+        });
+
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', function(e) {
             if (isFlashlightOn) {
-                turnOffFlashlight();
+                e.preventDefault();
+                e.returnValue = 'Screen light is currently on. Are you sure you want to leave?';
+                return e.returnValue;
             }
         });
     </script>
