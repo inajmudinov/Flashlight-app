@@ -97,9 +97,10 @@
         }
 
         body.flashlight-on .flashlight-button {
-            background-color: #333333;
-            border-color: #333333;
-            box-shadow: 0 8px 32px rgba(51, 51, 51, 0.3);
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            color: #000000;
         }
 
         .status {
@@ -199,25 +200,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>📱 Screen Light</h1>
+
         
         <button id="flashlightBtn" class="flashlight-button">
-            LIGHT
+            Тугмачаро зер кун
         </button>
         
         <div id="status" class="status">Tap to turn on screen light</div>
         
-        <div class="brightness-controls">
-            <button class="brightness-button" onclick="setBrightness('normal')">Normal</button>
-            <button class="brightness-button" onclick="setBrightness('warm')">Warm</button>
-            <button class="brightness-button" onclick="setBrightness('cool')">Cool</button>
-        </div>
+
         
-        <div class="instructions">
-            <p><strong>Screen Flashlight</strong></p>
-            <p>Uses your phone's screen as a bright light source. Perfect for reading in dark or finding items.</p>
-            <p><em>Tip: Use different brightness modes for various needs.</em></p>
-        </div>
+
     </div>
 
     <!-- Hidden video to prevent screen dimming -->
@@ -267,7 +260,7 @@
             isFlashlightOn = false;
             body.classList.remove('flashlight-on', 'brightness-max', 'brightness-warm', 'brightness-cool');
             
-            flashlightBtn.textContent = 'LIGHT';
+            flashlightBtn.textContent = 'Тугмачаро зер кун';
             statusDiv.textContent = 'Tap to turn on screen light';
         }
 
